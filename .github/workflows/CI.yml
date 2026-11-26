@@ -1,0 +1,28 @@
+name: CI
+
+on:
+    workflow_dispatch:
+
+jobs:
+    Build-and-push:
+        runs-on: self-hosted
+        steps:
+            - name: Code Clone
+              uses: actions/checkout@v7
+            - name: Docker Login
+              uses: docker/login-action@v4
+              with:
+                username: ${{vars.DOCKERHUB_USERNAME}}
+                password: ${{secrets.GITHUB_TOKEN}}
+            - name: Build and Push
+              uses: docker/build-push-action@v7
+              with:
+                context: .
+                push: true
+                tags: ${{vars.DOCKERHUB_USERNAME}}/test:test1
+
+
+    Deploy:
+        needs: [Build-and-push]
+        uses: ./.github/workflows/CD.yml
+        secrets: inherit          
